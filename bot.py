@@ -9,7 +9,7 @@ import requests
 nest_asyncio.apply()
 
 # Configuración del bot
-API_ID = int(os.getenv("API_I"))
+API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN = int(os.getenv("ADMIN"))  # ID del administrador
