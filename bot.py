@@ -10,6 +10,8 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "your_bot_token")  # Configura tu token de bo
 ADMIN = int(os.getenv("ADMIN", "123456789"))  # ID de usuario del administrador
 API_KEYS = os.getenv("API_KEYS", "").split(",")  # Claves separadas por comas
 API_BASE_URL = "https://api.render.com/v1"
+import asyncio
+import nest_asyncio
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -91,7 +93,7 @@ def gestionar_servicio(action, indices_str):
 
 # Filtro para comandos solo del administrador
 @bot.on_message(filters.command(["active", "suspend"]) & filters.user(ADMIN))
-def handle_commands(client, message):
+async def handle_commands(client, message):
     try:
         command, indices_str = message.text.split(" ", 1)
         action = "resume" if command == "/active" else "suspend"
@@ -103,8 +105,16 @@ def handle_commands(client, message):
         logger.error(f"Error en el comando: {str(e)}")
         message.reply_text("Ocurrió un error al procesar tu solicitud.")
 
-# Inicia el bot
+
+async def main():
+    await bot.start()
+    print("Bot iniciado y operativo.")
+
+    # Mantén el bot corriendo hasta que se detenga manualmente
+    await asyncio.Event().wait()
+
 if __name__ == "__main__":
-    logger.info("Bot iniciado...")
-    bot.run()
-                         
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Detención forzada realizada")
