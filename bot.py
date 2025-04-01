@@ -1,22 +1,24 @@
 import os
 import logging
 from pyrogram import Client, filters
-import requests
-
-# Configuración del bot
-API_ID = int(os.getenv("API_ID", "12345"))  # Configura tu API_ID
-API_HASH = os.getenv("API_HASH", "your_api_hash")  # Configura tu API_HASH
-BOT_TOKEN = os.getenv("BOT_TOKEN", "your_bot_token")  # Configura tu token de bot
-ADMIN = int(os.getenv("ADMIN", "123456789"))  # ID de usuario del administrador
-API_KEYS = os.getenv("API_KEYS", "").split(",")  # Claves separadas por comas
-API_BASE_URL = "https://api.render.com/v1"
 import asyncio
 import nest_asyncio
+import requests
+
+# Aplicar nest_asyncio
+nest_asyncio.apply()
+
+# Configuración del bot
+API_ID = int(os.getenv("API_I"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN = int(os.getenv("ADMIN"))  # ID del administrador
+API_KEYS = os.getenv("API_KEYS").split(",")  # Claves separadas por comas
+API_BASE_URL = "https://api.render.com/v1"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Crear instancia del bot
 bot = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Función para analizar rangos de índices
@@ -52,7 +54,6 @@ def gestionar_servicio(action, indices_str):
             headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
             service_url = f"{API_BASE_URL}/services"
             
-            # Obtener lista de servicios
             response = requests.get(service_url, headers=headers)
             response.raise_for_status()
             services = response.json() or []
@@ -98,23 +99,20 @@ async def handle_commands(client, message):
         command, indices_str = message.text.split(" ", 1)
         action = "resume" if command == "/active" else "suspend"
         result = gestionar_servicio(action, indices_str)
-        message.reply_text(result)
+        await message.reply_text(result)
     except ValueError:
-        message.reply_text("Por favor, usa el comando correctamente: /active <índices> o /suspend <índices>")
+        await message.reply_text("Por favor, usa el comando correctamente: /active <índices> o /suspend <índices>")
     except Exception as e:
         logger.error(f"Error en el comando: {str(e)}")
-        message.reply_text("Ocurrió un error al procesar tu solicitud.")
-
+        await message.reply_text("Ocurrió un error al procesar tu solicitud.")
 
 async def main():
     await bot.start()
     print("Bot iniciado y operativo.")
-
-    # Mantén el bot corriendo hasta que se detenga manualmente
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("Detención forzada realizada")
+        print("Bot detenido manualmente.")
