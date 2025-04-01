@@ -24,7 +24,9 @@ bot = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Función para analizar rangos de índices
 def parse_indices(indices_str):
-    if indices_str.strip().lower() == "all":
+    # Normalizar la entrada para manejar diferentes casos y formatos
+    indices_str = indices_str.strip().lower()  # Convertir a minúsculas y eliminar espacios extra
+    if indices_str == "all":
         return list(range(1, len(API_KEYS) + 1))  # Retorna todos los índices comenzando en 1
 
     indices = set()
@@ -42,6 +44,7 @@ def parse_indices(indices_str):
         raise ValueError("Formato inválido para índices. Usa números, rangos (e.g., 1-3), o 'all'.")
     
     return sorted(indices)
+
 
 # Función para suspender o activar servicios
 def gestionar_servicio(action, indices_str):
