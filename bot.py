@@ -4,6 +4,7 @@ from pyrogram import Client, filters
 import asyncio
 import nest_asyncio
 import requests
+import json
 
 # Aplicar nest_asyncio
 nest_asyncio.apply()
@@ -81,6 +82,10 @@ def gestionar_servicio(action, indices_str):
                     response = requests.post(f"{API_BASE_URL}/services/{service_id}/resume", headers=headers)
                     if response.status_code in [200, 202]:
                         resultados.append(f"Servicio {service_name} activado correctamente.")
+
+                        # Inicia el redeploy después de activar
+                        redeploy_result = trigger_redeploy(service_id, api_key)
+                        resultados.append(redeploy_result)
                     else:
                         resultados.append(f"Error al activar {service_name}: {response.status_code}")
 
@@ -91,6 +96,21 @@ def gestionar_servicio(action, indices_str):
     except Exception as e:
         logger.error(f"Error al gestionar servicio: {str(e)}")
         return f"Se produjo un error: {str(e)}"
+
+# Función para realizar redeploy desde Render
+def trigger_redeploy(service_id, api_key):
+    try:
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        redeploy_url = f"{API_BASE_URL}/services/{service_id}/deploys"
+
+        response = requests.post(redeploy_url, headers=headers)
+        if response.status_code in [200, 202]:
+            return f"Redeploy iniciado correctamente para el servicio con ID {service_id}."
+        else:
+            return f"Error al iniciar el redeploy: {response.status_code} - {response.text}"
+    except Exception as e:
+        logger.error(f"Error al iniciar el redeploy: {str(e)}")
+        return f"Se produjo un error al intentar redeploy: {str(e)}"
 
 # Filtro para comandos solo del administrador
 @bot.on_message(filters.command(["active", "suspend"]) & filters.user(ADMIN))
